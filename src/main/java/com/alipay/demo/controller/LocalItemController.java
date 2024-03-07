@@ -17,8 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.*;
 
 @RestController
-@RequestMapping(value = "/api")
-public class AlipayDemoController {
+@RequestMapping(value = "/item")
+public class LocalItemController {
 
     @Autowired
     private AlipaySdkUtil alipaySdkUtil;
@@ -27,15 +27,24 @@ public class AlipayDemoController {
     private LocalItemService localItemService;
 
 
-
-    @PostMapping(value = "/openapi")
-    public String openapi(@RequestBody Map<String, String> params) {
+    @PostMapping(value = "/create")
+    public String create(@RequestBody Map<String, String> params) {
 
         String categoryId = localItemService.getCategoryId(params.get("itemType"));
         if (categoryId == null) {
             return "error";
         }
-        return localItemService.createLocalItem(categoryId, params.get("productName"));
+        return localItemService.createLocalItem(categoryId, params.get("productName"), params.get("outItemId"));
+    }
+
+    @PostMapping(value = "/delete")
+    public String delete(@RequestBody Map<String, String> params) {
+        return localItemService.deleteLocalItem(params.get("itemId"), params.get("outItemId"));
+    }
+
+    @PostMapping(value = "/query")
+    public String query(@RequestBody Map<String, String> params) {
+        return localItemService.queryItemDetail(params.get("itemId"), params.get("outItemId"));
     }
 
     /**

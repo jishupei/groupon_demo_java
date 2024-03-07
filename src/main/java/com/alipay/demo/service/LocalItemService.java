@@ -27,5 +27,15 @@ public interface LocalItemService {
     /**
      * 创建商品
      */
-    String createLocalItem(String categoryId, String productName);
+    String createLocalItem(String categoryId, String productName, String outItemId);
+
+    /**
+     * 删除商品
+     */
+    String deleteLocalItem(String itemId, String outItemId);
+
+    /**
+     * 查询商品详情
+     */
+    String queryItemDetail(String itemId, String outItemId);
 }

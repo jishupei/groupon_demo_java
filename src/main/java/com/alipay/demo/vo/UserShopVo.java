@@ -4,12 +4,16 @@
  */
 package com.alipay.demo.vo;
 
+import com.alibaba.fastjson.PropertyNamingStrategy;
+import com.alibaba.fastjson.annotation.JSONType;
+
 import java.io.Serializable;
 
 /**
  * @author jishupei.jsp
  * @version : UserShopVo, v0.1 2024年03月06日 4:45 下午 jishupei.jsp Exp $
  */
+@JSONType(naming= PropertyNamingStrategy.SnakeCase)
 public class UserShopVo implements Serializable {
 
     private static final long serialVersionUID = 714077787134000912L;

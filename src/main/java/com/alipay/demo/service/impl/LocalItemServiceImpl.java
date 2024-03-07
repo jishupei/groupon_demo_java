@@ -7,12 +7,8 @@ package com.alipay.demo.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.domain.*;
-import com.alipay.api.request.AlipayOpenAppLocalitemAllcategoryQueryRequest;
-import com.alipay.api.request.AlipayOpenAppLocalitemCreateRequest;
-import com.alipay.api.request.AlipayOpenAppLocalitemTemplateQueryRequest;
-import com.alipay.api.response.AlipayOpenAppLocalitemAllcategoryQueryResponse;
-import com.alipay.api.response.AlipayOpenAppLocalitemCreateResponse;
-import com.alipay.api.response.AlipayOpenAppLocalitemTemplateQueryResponse;
+import com.alipay.api.request.*;
+import com.alipay.api.response.*;
 import com.alipay.demo.service.AntMerchantShopService;
 import com.alipay.demo.service.LocalItemService;
 import com.alipay.demo.util.AlipaySdkUtil;
@@ -97,7 +93,7 @@ public class LocalItemServiceImpl implements LocalItemService {
     }
 
     @Override
-    public String createLocalItem(String categoryId, String productName) {
+    public String createLocalItem(String categoryId, String productName, String outItemId) {
         // 构造请求参数以调用接口
         AlipayOpenAppLocalitemCreateRequest request = new AlipayOpenAppLocalitemCreateRequest();
         AlipayOpenAppLocalitemCreateModel model = new AlipayOpenAppLocalitemCreateModel();
@@ -109,7 +105,7 @@ public class LocalItemServiceImpl implements LocalItemService {
         model.setItemType("1");
 
         // 设置商家侧商品ID
-        model.setOutItemId("2088641404859410");
+        model.setOutItemId(outItemId);
 
         // 设置C端详情页模式
         model.setItemDetailsPageModel("1");
@@ -170,6 +166,78 @@ public class LocalItemServiceImpl implements LocalItemService {
         return "alipay.open.app.localitem.create调用失败";
     }
 
+    @Override
+    public String deleteLocalItem(String itemId, String outItemId) {
+        // 构造请求参数以调用接口
+        AlipayOpenAppItemDeleteRequest request = new AlipayOpenAppItemDeleteRequest();
+        AlipayOpenAppItemDeleteModel model = new AlipayOpenAppItemDeleteModel();
+
+        if (outItemId != null && !"".equals(outItemId)) {
+            // 设置商家侧商品ID列表
+            List<String> outItemIdList = new java.util.ArrayList<>();
+            outItemIdList.add(outItemId);
+            model.setOutItemIdList(outItemIdList);
+        }
+        if (itemId != null && !"".equals(itemId)) {
+            // 设置支付宝平台侧商品ID
+            List<String> itemIdList = new java.util.ArrayList<>();
+            itemIdList.add(itemId);
+            model.setItemIdList(itemIdList);
+        }
+
+        request.setBizModel(model);
+        try {
+            AlipayOpenAppItemDeleteResponse response = alipaySdkUtil.getAlipayClient().execute(request);
+            System.out.println(response.getBody());
+
+            if (response.isSuccess()) {
+                System.out.println("调用成功");
+            } else {
+                System.out.println("alipay.open.app.item.delete调用失败");
+            }
+            return JSON.toJSONString(response);
+        } catch (AlipayApiException e) {
+            e.printStackTrace();
+        }
+        return "alipay.open.app.item.delete调用失败";
+    }
+
+    @Override
+    public String queryItemDetail(String itemId, String outItemId) {
+        // 构造请求参数以调用接口
+        AlipayOpenAppLocalitemQueryRequest request = new AlipayOpenAppLocalitemQueryRequest();
+        AlipayOpenAppLocalitemQueryModel model = new AlipayOpenAppLocalitemQueryModel();
+
+        if (outItemId != null && !"".equals(outItemId)) {
+            // 设置支付宝侧商品id
+            model.setItemId(itemId);
+        }
+
+        if (outItemId != null && !"".equals(outItemId)) {
+            // 设置商家侧商品id
+            model.setOutItemId(outItemId);
+        }
+
+        // 设置是否查询编辑版本
+        model.setNeedEditSpu("1");
+
+        request.setBizModel(model);
+        try {
+            AlipayOpenAppLocalitemQueryResponse response = alipaySdkUtil.getAlipayClient().execute(request);
+            System.out.println(response.getBody());
+
+            if (response.isSuccess()) {
+                System.out.println("调用成功");
+            } else {
+                System.out.println("alipay.open.app.localitem.query调用失败");
+            }
+            return JSON.toJSONString(response);
+        } catch (AlipayApiException e) {
+            e.printStackTrace();
+        }
+        return "alipay.open.app.localitem.query调用失败";
+    }
+
     private List<AppItemAttrVO> getItemAttrs(String categoryId) {
         List<AppItemAttrVO> attrs = new java.util.ArrayList<>();
         List<AttributeVO> attributes = queryTemplateAttrList(categoryId);
@@ -193,8 +261,7 @@ public class LocalItemServiceImpl implements LocalItemService {
                     appItemAttrVO.setAttrValue("{\"settle_type\":\"1\",\"settle_pid_info\":\"2088641404859410\"}");
                     break;
                 case "use_shop":
-//                    appItemAttrVO.setAttrValue(antMerchantShopService.queryShopIdByPage(1, 3));
-                    appItemAttrVO.setAttrValue("[{\"shop_id\":\"2023112700502007080037177165\"}]");
+                    appItemAttrVO.setAttrValue(antMerchantShopService.queryShopIdByPage(1, 10));
                     break;
                 case "sold_time":
                     appItemAttrVO.setAttrValue("{\"start_time\": \"2024-02-25 18:00:00\",\"end_time\": \"2024-04-20 18:00:00\"}");
@@ -221,7 +288,7 @@ public class LocalItemServiceImpl implements LocalItemService {
                     appItemAttrVO.setAttrValue("[\"1\",\"2\"]");
                     break;
                 case "use_date":
-                    appItemAttrVO.setAttrValue("{\"use_date_type\":\"1\",\"use_start_date\":\"2024-03-05 23:00:00\",\"use_end_date\":\"2024-04-06 23:00:00\"}");
+                    appItemAttrVO.setAttrValue("{\"use_date_type\":\"1\",\"use_start_date\":\"2024-03-05\",\"use_end_date\":\"2024-09-06\"}");
                     break;
                 case "use_limit":
                     appItemAttrVO.setAttrValue("{\"use_time_type\":\"2\",\"use_date_list\":[{\"days_of_week\":[\"1\",\"2\"],\"start_time\":\"09:00:00\",\"end_time\":\"20:30:00\",\"end_time_type\":\"SAME_DAY\"}],\"can_no_use_date_list\":[{\"holidays\":[{\"start_time\":\"09:00:00\",\"end_time\":\"21:30:00\",\"end_time_type\":\"SAME_DAY\"}],\"date_list\":[{\"start_date\":\"2024-03-22\",\"end_date\":\"2024-06-25\",\"start_time\":\"09:00:00\",\"end_time\":\"23:00:00\",\"end_time_type\":\"SAME_DAY\"}]}]}");
@@ -230,7 +297,7 @@ public class LocalItemServiceImpl implements LocalItemService {
                     appItemAttrVO.setAttrValue("{\"need_appointment\":true,\"appointment_instruction\":\"预约说明：请至少提前一天预约。\"}");
                     break;
                 case "refund_rule":
-                    appItemAttrVO.setAttrValue("{\"refund_policy\":[\"5\"]}");
+                    appItemAttrVO.setAttrValue("{\"refund_policy\": [\"1\", \"2\"]}");
                     break;
                 case "merchant_refund_confirm":
                     appItemAttrVO.setAttrValue("1");
